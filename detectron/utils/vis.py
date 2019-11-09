@@ -416,19 +416,30 @@ def vis_one_image(
             All_inds_tmp[All_inds_tmp == 0] = CurrentMask[All_inds_tmp == 0] * (i + 1)  # avoid `i` starting with 0
             All_inds[y1:y1 + out_height, x1:x1 + out_width] = All_inds_tmp
 
+    SAVE_ALL = False
     # scale predicted UV coordinates to [0, 255]
     All_coords[:, :, 1:3] = All_coords[:, :, 1:3] * 255.
     All_coords[All_coords > 255] = 255.
     All_coords = All_coords.astype(np.uint8)
     All_inds = All_inds.astype(np.uint8)
-    # save IUV images into files
-    IUV_SaveName = os.path.basename(im_name).split('.')[0] + '_IUV.png'
-    INDS_SaveName = os.path.basename(im_name).split('.')[0] + '_INDS.png'
-    cv2.imwrite(os.path.join(output_dir, '{}'.format(IUV_SaveName)), All_coords)
-    cv2.imwrite(os.path.join(output_dir, '{}'.format(INDS_SaveName)), All_inds)
-    print('IUV written to: ', os.path.join(output_dir, '{}'.format(IUV_SaveName)))
-    ### DensePose Visualization Done!!
+    if SAVE_ALL:
+        # save IUV images into files
+        # todo: @QiuFeng 2019-11-09 => Notice there is '.' in h36m raw images filename, thus use [:-4] to truncate
+        # IUV_SaveName = os.path.basename(im_name).split('.')[0] + '_IUV.png'
+        # INDS_SaveName = os.path.basename(im_name).split('.')[0] + '_INDS.png'
+        IUV_SaveName = os.path.basename(im_name)[:-4] + '_IUV.png'
+        INDS_SaveName = os.path.basename(im_name)[:-4] + '_INDS.png'
+        cv2.imwrite(os.path.join(output_dir, '{}'.format(IUV_SaveName)), All_coords)
+        cv2.imwrite(os.path.join(output_dir, '{}'.format(INDS_SaveName)), All_inds)
+        print('IUV written to: ', os.path.join(output_dir, '{}'.format(IUV_SaveName)))
+        ### DensePose Visualization Done!!
 
-    output_name = os.path.basename(im_name) + '.' + ext
-    fig.savefig(os.path.join(output_dir, '{}'.format(output_name)), dpi=dpi)
-    plt.close('all')
+        output_name = os.path.basename(im_name) + '.' + ext
+        fig.savefig(os.path.join(output_dir, '{}'.format(output_name)), dpi=dpi)
+        plt.close('all')
+        print('output-name:', IUV_SaveName, INDS_SaveName, output_name)
+    else:
+        segments_ = All_coords[..., 0]
+        IUV_SaveName = os.path.basename(im_name)[:-4] + '_IUV.png'
+        cv2.imwrite(os.path.join(output_dir, '{}'.format(IUV_SaveName)), segments_)
+        print('IUV written to: ', os.path.join(output_dir, '{}'.format(IUV_SaveName)))

@@ -130,11 +130,16 @@ def main(args):
     else:
         im_list = [args.im_or_folder]
 
+    # todo: @QiuFeng 2019-11-09
+    #    hack im_list, replacing by valid_images.txt
+    im_list = open('/data/dataset/h36m/annot/valid_images.txt').read().splitlines()
+    im_fd_ = '/data/dataset/h36m/images/'
     for i, im_name in enumerate(im_list):
         out_name = os.path.join(
             args.output_dir, '{}'.format(os.path.basename(im_name) + '.' + args.output_ext)
         )
         logger.info('Processing {} -> {}'.format(im_name, out_name))
+        im_name = os.path.join(im_fd_, im_name)
         im = cv2.imread(im_name)
         timers = defaultdict(Timer)
         t = time.time()
