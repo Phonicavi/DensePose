@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# activate conda envs
+conda activate py37_pt1.1_cuda9.0
+
+# export PATHs
+export CONDA_ENV_PATH=/data/anaconda3/envs/py37_pt1.1_cuda9.0
+export CONDA_PKGS_PATH=/data/anaconda3/envs/py37_pt1.1_cuda9.0/lib/python3.7/site-packages
+
+export TORCH_PATH=$CONDA_PKGS_PATH/torch
+export CAFFE2_INCLUDE_PATH=$TORCH_PATH/include/caffe2
+
+export COCOAPI=/data/documents/git/cocoapi
+export DENSEPOSE=/data/documents/git/DensePose
+export PYTORCH=/data/documents/git/pytorch
+
+# pass Detectron tests
+python $DENSEPOSE/detectron/tests/test_spatial_narrow_as_op.py
+
+# update CMakeList.txt file
+
+# establish symbolink for pytorch header files
+ln -s $PYTORCH/caffe2/utils/threadpool $CAFFE2_INCLUDE_PATH/utils/
+ln -s $PYTORCH/caffe2/utils/math $CAFFE2_INCLUDE_PATH/utils/
+
+# build, must be using GCC-4.9.2 instead of GCC-5.4.0
+cd $DENSEPOSE/build
+cmake .. && make
+
+# pass custom operator tests
+python $DENSEPOSE/detectron/tests/test_zero_even_op.py
+
